@@ -42,7 +42,7 @@ export default defineEventHandler((e) => {
   }
 
   if (method === "DELETE") {
-    const { todo, index } = findTodoById(id);
+    const { index } = findTodoById(id);
     db.todos.splice(index, 1);
 
     return { message: "item deleted" };
