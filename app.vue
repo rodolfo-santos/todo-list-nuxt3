@@ -1,10 +1,13 @@
 <script lang="ts" setup>
-const { data: todos } = useFetch("/api/todo");
+const { data: todos, refresh } = useAsyncData("todo", async () => {
+  return $fetch("/api/todo");
+});
 const input = ref("");
 
 async function addTodo(): Promise<void> {
   if (!input) return;
   await $fetch("/api/todo", { method: "post", body: { item: input.value } });
+  refresh();
 }
 
 async function updateTodo(id): Promise<void> {
@@ -12,10 +15,12 @@ async function updateTodo(id): Promise<void> {
     method: "put",
     body: { item: input.value },
   });
+  refresh();
 }
 
 async function deleteTodo(id): Promise<void> {
   await $fetch(`/api/todo/${id}`, { method: "delete" });
+  refresh();
 }
 </script>
 
@@ -27,13 +32,13 @@ async function deleteTodo(id): Promise<void> {
         <input v-model="input" placeholder="Add a new todo" />
         <NButton @click="addTodo">Add</NButton>
       </div>
-      <NCard
-        v-for="todo in todos"
-        class="card"
-        :key="todo.is"
-        @click="updateTodo(todo.id)"
-      >
-        <h4 :class="todo.completed ? 'complete' : null">{{ todo.item }}</h4>
+      <NCard v-for="todo in todos" class="card" :key="todo.is">
+        <h4
+          :class="todo.completed ? 'complete' : null"
+          @click="updateTodo(todo.id)"
+        >
+          {{ todo.item }}
+        </h4>
         <p @click="deleteTodo(todo.id)">X</p>
       </NCard>
     </NCard>
